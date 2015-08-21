@@ -1,5 +1,5 @@
 class Tink {
-  constructor(element, scale = 1) {
+  constructor(PIXI, element, scale = 1) {
 
     //Add element and scale properties
     this.element = element;
@@ -11,6 +11,18 @@ class Tink {
     //An array to store all the pointer objects
     //(there will usually just be one)
     this.pointers = [];
+
+    //An array to store all the buttons and button-like
+    //interactive sprites
+    this.buttons = [];
+
+    //A local PIXI reference
+    this.PIXI = PIXI;
+
+    //Aliases for Pixi objects
+    this.TextureCache = this.PIXI.utils.TextureCache;
+    this.MovieClip = this.PIXI.extras.MovieClip;
+    this.Texture = this.PIXI.Texture;
   }
 
   //`makeDraggable` lets you make a drag-and-drop sprite by pushing it
@@ -409,11 +421,278 @@ class Tink {
     });
   }
 
+  makeInteractive(o) {
+
+    //The `press`,`release`, `over`, `out` and `tap` methods. They're `undefined`
+    //for now, but they can be defined in the game program
+    o.press = o.press || undefined;
+    o.release = o.release || undefined;
+    o.over = o.over || undefined;
+    o.out = o.out || undefined;
+    o.tap = o.tap || undefined;
+
+    //The `state` property tells you the button's
+    //current state. Set its initial state to "up"
+    o.state = "up";
+
+    //The `action` property tells you whether its being pressed or
+    //released
+    o.action = "";
+
+    //The `pressed` and `hoverOver` Booleans are mainly for internal
+    //use in this code to help figure out the correct state.
+    //`pressed` is a Boolean that helps track whether or not
+    //the sprite has been pressed down
+    o.pressed = false;
+
+    //`hoverOver` is a Boolean which checks whether the pointer
+    //has hovered over the sprite
+    o.hoverOver = false;
+
+    //tinkType is a string that will be set to "button" if the 
+    //user creates an object using the `button` function
+    o.tinkType = "";
+
+    //Add the sprite to the global `buttons` array so that it can
+    //be updated each frame in the `updateButtons method
+    this.buttons.push(o);
+  }
+
+  //The `updateButtons` method will be called each frame 
+  //inside the game loop. It updates all the button-like sprites
+  updateButtons() {
+
+    //Create a pointer if one doesn't already exist
+    if (this.pointers.length === 0) {
+      this.makePointer(this.element, this.scale);
+    }
+
+    //Loop through all the button-like sprites that were created
+    //using the `makeInteractive` method
+    this.buttons.forEach(o => {
+
+      //Loop through all of Tink's pointers (there will usually
+      //just be one)
+      this.pointers.forEach(pointer => {
+
+        //Figure out if the pointer is touching the sprite
+        let hit = pointer.hitTestSprite(o);
+
+        //1. Figure out the current state
+        if (pointer.isUp) {
+
+          //Up state
+          o.state = "up";
+
+          //Show the first image state frame, if this is a `Button` sprite
+          if (o.tinkType === "button") o.gotoAndStop(0);
+        }
+
+        //If the pointer is touching the sprite, figure out
+        //if the over or down state should be displayed
+        if (hit) {
+
+          //Over state
+          o.state = "over";
+
+          //Show the second image state frame if this sprite has
+          //3 frames and it's a `Button` sprite
+          if (o.totalFrames && o.totalFrames === 3 && o.tinkType === "button") {
+            o.gotoAndStop(1);
+          }
+
+          //Down state
+          if (pointer.isDown) {
+            o.state = "down";
+
+            //Show the third frame if this sprite is a `Button` sprite and it
+            //has only three frames, or show the second frame if it
+            //only has two frames
+            if(o.tinkType === "button") {
+              if (o.totalFrames === 3) {
+                o.gotoAndStop(2);
+              } else {
+                o.gotoAndStop(1);
+              }
+            }
+          }
+
+          //Change the pointer icon to a hand
+          pointer.cursor = "pointer";
+        } else {
+          pointer.cursor = "auto";
+        }
+
+        //Perform the correct interactive action
+
+        //a. Run the `press` method if the sprite state is "down" and
+        //the sprite hasn't already been pressed
+        if (o.state === "down") {
+          if (!o.pressed) {
+            if (o.press) o.press();
+            o.pressed = true;
+            o.action = "pressed";
+          }
+        }
+
+        //b. Run the `release` method if the sprite state is "over" and
+        //the sprite has been pressed
+        if (o.state === "over") {
+          if (o.pressed) {
+            if (o.release) o.release();
+            o.pressed = false;
+            o.action = "released";
+            //If the pointer was tapped and the user assigned a `tap`
+            //method, call the `tap` method
+            if (pointer.tapped && o.tap) o.tap();
+          }
+
+          //Run the `over` method if it has been assigned
+          if (!o.hoverOver) {
+            if (o.over) o.over();
+            o.hoverOver = true;
+          }
+        }
+
+        //c. Check whether the pointer has been released outside
+        //the sprite's area. If the button state is "up" and it's
+        //already been pressed, then run the `release` method.
+        if (o.state === "up") {
+          if (o.pressed) {
+            if (o.release) o.release();
+            o.pressed = false;
+            o.action = "released";
+          }
+
+          //Run the `out` method if it has been assigned
+          if (o.hoverOver) {
+            if (o.out) o.out();
+            o.hoverOver = false;
+          }
+        }
+      });
+    });
+  }
+
+  //A function that creates a sprite with 3 frames that
+  //represent the button states: up, over and down
+  button(source, x = 0, y = 0) {
+
+    //The sprite object that will be returned
+    let o;
+
+    //Is it an array of frame ids or textures?
+    if(typeof source[0] === "string") {
+
+      //They're strings, but are they pre-existing texture or
+      //paths to image files?
+      //Check to see if the first element matches a texture in the
+      //cache
+      if(this.TextureCache[source[0]]){
+
+        //It does, so it's an array of frame ids
+        o = this.MovieClip.fromFrames(source);
+      }
+      else {
+
+        //It's not already in the cache, so let's load it
+        o = this.MovieClip.fromImages(source);
+      }
+    }
+
+    //If the `source` isn't an array of strings, check whether
+    //it's an array of textures
+    else if (source[0] instanceof this.Texture) {
+
+      //Yes, it's an array of textures. 
+      //Use them to make a MovieClip o 
+      o = new this.MovieClip(source);
+    }
+
+    //Add interactive properties to the button
+    this.makeInteractive(o);
+
+    //Set the `tinkType` to "button"
+    o.tinkType = "button";
+
+    //Position the button
+    o.x = x;
+    o.y = y;
+
+    //Return the new button sprite
+    return o;
+  }
+
   //Run the `udpate` function in your game loop
   //to update all of Tink's interactive objects
   update() {
     
     //Update the drag and drop system
     if (this.draggableSprites.length !== 0) this.updateDragAndDrop(this.draggableSprites);
+
+    //Update the buttons and button-like interactive sprites
+    if (this.buttons.length !== 0) this.updateButtons();
+  }
+
+  /*
+  `keyboard` is a method that listens for and captures keyboard events. It's really
+  just a convenient wrapper function for HTML `keyup` and `keydown` events so that you can keep your application code clutter-free and easier to write and read.
+
+  Here's how to use the `keyboard` method. Create a new keyboard object like this:
+  ```js
+  let keyObject = keyboard(asciiKeyCodeNumber);
+  ```
+  It's one argument is the ASCII key code number of the keyboard key
+  that you want to listen for. [Here's a list of ASCII key codes you can
+  use](http://www.asciitable.com).
+  Then assign `press` and `release` methods to the keyboard object like this:
+  ```js
+  keyObject.press = () => {
+    //key object pressed
+  };
+  keyObject.release = () => {
+    //key object released
+  };
+  ```
+  Keyboard objects also have `isDown` and `isUp` Boolean properties that you can use to check the state of each key. 
+  */
+  keyboard(keyCode) {
+    let key = {};
+    key.code = keyCode;
+    key.isDown = false;
+    key.isUp = true;
+    key.press = undefined;
+    key.release = undefined;
+
+    //The `downHandler`
+    key.downHandler = event => {
+      if (event.keyCode === key.code) {
+        if (key.isUp && key.press) key.press();
+        key.isDown = true;
+        key.isUp = false;
+      }
+      event.preventDefault();
+    };
+
+    //The `upHandler`
+    key.upHandler = event => {
+      if (event.keyCode === key.code) {
+        if (key.isDown && key.release) key.release();
+        key.isDown = false;
+        key.isUp = true;
+      }
+      event.preventDefault();
+    };
+
+    //Attach event listeners
+    window.addEventListener(
+      "keydown", key.downHandler.bind(key), false
+    );
+    window.addEventListener(
+      "keyup", key.upHandler.bind(key), false
+    );
+
+    //Return the key object
+    return key;
   }
 }
