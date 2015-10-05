@@ -1,4 +1,4 @@
-class Tink {
+export class Tink {
   constructor(PIXI, element, scale = 1) {
 
     //Add element and scale properties
