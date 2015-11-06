@@ -60,6 +60,10 @@ export class Tink {
       _x: 0,
       _y: 0,
 
+      //Width and height
+      width: 1,
+      height: 1,
+
       //The public x and y properties are divided by the scale. If the
       //HTML element that the pointer is sensitive to (like the canvas)
       //is scaled up or down, you can change the `scale` value to
