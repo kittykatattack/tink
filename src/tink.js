@@ -97,7 +97,7 @@ class Tink {
       //Add a `cursor` getter/setter to change the pointer's cursor
       //style. Values can be "pointer" (for a hand icon) or "auto" for 
       //an ordinary arrow icon.
-      get cursor(value) {
+      get cursor() {
         return this.element.style.cursor;
       },
       set cursor(value) {
@@ -126,17 +126,26 @@ class Tink {
       dragOffsetY: 0,
 
       //A property to check whether or not the pointer
-      //is hidden
-      hidden: false,
+      //is visible
+      _visible: true,
+      get visible() {
+        return this._visible;
+      },
+      set visible(value) {
+        if (value === true) {
+          this.cursor = "auto";
+        } else {  
+          this.cursor = "none";
+        }
+        this._visible = value;
+      },
 
       //Methods to hide and show the pointer
       hide() {
         this.hidden = true;
-        this.cursor = "none";
       },
       show() {
         this.hidden = false;
-        this.cursor = "auto";
       },
 
       //The pointer's mouse `moveHandler`
@@ -432,10 +441,10 @@ class Tink {
       //draggable sprite
       draggableSprites.some(sprite => {
         if (pointer.hitTestSprite(sprite) && sprite.draggable) {
-          if (!pointer.hidden) pointer.cursor = "pointer";
+          if (!pointer.visible) pointer.cursor = "pointer";
           return true;
         } else {
-          if (!pointer.hidden) pointer.cursor = "auto";
+          if (!pointer.visible) pointer.cursor = "auto";
           return false;
         }
       });
@@ -538,10 +547,13 @@ class Tink {
             }
           }
 
+
           //Change the pointer icon to a hand
-          if (!pointer.hidden) pointer.cursor = "pointer";
+          if (pointer.visible) pointer.cursor = "pointer";
         } else {
-          if (!pointer.hidden) pointer.cursor = "auto";
+          //Turn the pointer to an ordinary arrow icon if the
+          //pointer isn't touching a sprite
+          if (pointer.visible) pointer.cursor = "auto";
         }
 
         //Perform the correct interactive action

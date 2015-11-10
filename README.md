@@ -88,6 +88,17 @@ pointer.isUp
 pointer.isDown
 pointer.tapped
 ```
+
+If you need to hide the pointer for some reason, use the Boolean `visible`
+property. 
+```js
+//Hide the pointer
+pointer.visible = false;
+
+//Make the pointer visible
+pointer.visible = true;
+```
+
 Pointer interaction with sprites
 --------------------------------
 

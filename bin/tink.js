@@ -115,17 +115,15 @@ var Tink = (function () {
         dragOffsetY: 0,
 
         //A property to check whether or not the pointer
-        //is hidden
-        hidden: false,
+        //is visible
+        _visible: true,
 
         //Methods to hide and show the pointer
         hide: function hide() {
           this.hidden = true;
-          this.cursor = "none";
         },
         show: function show() {
           this.hidden = false;
-          this.cursor = "auto";
         },
 
         //The pointer's mouse `moveHandler`
@@ -332,11 +330,26 @@ var Tink = (function () {
           //style. Values can be "pointer" (for a hand icon) or "auto" for
           //an ordinary arrow icon.
 
-          get: function (value) {
+          get: function () {
             return this.element.style.cursor;
           },
           set: function (value) {
             this.element.style.cursor = value;
+          },
+          configurable: true,
+          enumerable: true
+        },
+        visible: {
+          get: function () {
+            return this._visible;
+          },
+          set: function (value) {
+            if (value === true) {
+              this.cursor = "auto";
+            } else {
+              this.cursor = "none";
+            }
+            this._visible = value;
           },
           configurable: true,
           enumerable: true
@@ -474,10 +487,10 @@ var Tink = (function () {
         //draggable sprite
         draggableSprites.some(function (sprite) {
           if (pointer.hitTestSprite(sprite) && sprite.draggable) {
-            if (!pointer.hidden) pointer.cursor = "pointer";
+            if (!pointer.visible) pointer.cursor = "pointer";
             return true;
           } else {
-            if (!pointer.hidden) pointer.cursor = "auto";
+            if (!pointer.visible) pointer.cursor = "auto";
             return false;
           }
         });
@@ -585,9 +598,11 @@ var Tink = (function () {
             }
 
             //Change the pointer icon to a hand
-            if (!pointer.hidden) pointer.cursor = "pointer";
+            if (pointer.visible) pointer.cursor = "pointer";
           } else {
-            if (!pointer.hidden) pointer.cursor = "auto";
+            //Turn the pointer to an ordinary arrow icon if the
+            //pointer isn't touching a sprite
+            if (pointer.visible) pointer.cursor = "auto";
           }
 
           //Perform the correct interactive action
