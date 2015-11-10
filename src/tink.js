@@ -1,4 +1,4 @@
-export class Tink {
+class Tink {
   constructor(PIXI, element, scale = 1) {
 
     //Add element and scale properties
@@ -79,7 +79,7 @@ export class Tink {
       //can use the pointer's coordinates with easing
       //and collision functions
       get centerX() {
-        return this.x; 
+        return this.x;
       },
       get centerY() {
         return this.y;
@@ -88,7 +88,10 @@ export class Tink {
       //`position` returns an object with x and y properties that
       //contain the pointer's position
       get position() {
-        return {x: this.x, y: this.y};
+        return {
+          x: this.x,
+          y: this.y
+        };
       },
 
       //Add a `cursor` getter/setter to change the pointer's cursor
@@ -100,7 +103,7 @@ export class Tink {
       set cursor(value) {
         this.element.style.cursor = value;
       },
-      
+
       //Booleans to track the pointer state
       isDown: false,
       isUp: true,
@@ -121,7 +124,21 @@ export class Tink {
       //The drag offsets to help drag sprites
       dragOffsetX: 0,
       dragOffsetY: 0,
-      
+
+      //A property to check whether or not the pointer
+      //is hidden
+      hidden: false,
+
+      //Methods to hide and show the pointer
+      hide() {
+        this.hidden = true;
+        this.cursor = "none";
+      },
+      show() {
+        this.hidden = false;
+        this.cursor = "auto";
+      },
+
       //The pointer's mouse `moveHandler`
       moveHandler(event) {
 
@@ -195,7 +212,7 @@ export class Tink {
           this.tapped = true;
 
           //Call the `tap` method if it's been assigned
-          if (this.tap) this.tap(); 
+          if (this.tap) this.tap();
         }
         this.isUp = true;
         this.isDown = false;
@@ -216,7 +233,7 @@ export class Tink {
           this.tapped = true;
 
           //Call the `tap` method if it's been assigned
-          if (this.tap) this.tap(); 
+          if (this.tap) this.tap();
         }
         this.isUp = true;
         this.isDown = false;
@@ -232,7 +249,7 @@ export class Tink {
         //Add global `gx` and `gy` properties to the sprite if they
         //don't already exist
         addGlobalPositionProperties(sprite);
-          
+
         //The `hit` variable will become `true` if the pointer is
         //touching the sprite and remain `false` if it isn't
         let hit = false;
@@ -243,26 +260,24 @@ export class Tink {
           //Get the position of the sprite's edges using global
           //coordinates
           let left = sprite.gx,
-              right = sprite.gx + sprite.width,
-              top = sprite.gy,
-              bottom = sprite.gy + sprite.height;
+            right = sprite.gx + sprite.width,
+            top = sprite.gy,
+            bottom = sprite.gy + sprite.height;
 
           //Find out if the pointer is intersecting the rectangle.
           //`hit` will become `true` if the pointer is inside the
           //sprite's area
-          hit 
-            = this.x > left && this.x < right 
-            && this.y > top && this.y < bottom;
+          hit = this.x > left && this.x < right && this.y > top && this.y < bottom;
         }
 
         //Is the sprite circular?
         else {
-          
+
           //Find the distance between the pointer and the
           //center of the circle
           let vx = this.x - (sprite.gx + sprite.width / 2),
-              vy = this.y - (sprite.gy + sprite.width / 2),
-              distance = Math.sqrt(vx * vx + vy * vy);
+            vy = this.y - (sprite.gy + sprite.width / 2),
+            distance = Math.sqrt(vx * vx + vy * vy);
 
           //The pointer is intersecting the circle if the
           //distance is less than the circle's radius
@@ -280,7 +295,7 @@ export class Tink {
     element.addEventListener(
       "mousedown", pointer.downHandler.bind(pointer), false
     );
-    
+
     //Add the `mouseup` event to the `window` to
     //catch a mouse button release outside of the canvas area
     window.addEventListener(
@@ -318,23 +333,25 @@ export class Tink {
   addGlobalPositionProperties(sprite) {
     if (sprite.gx === undefined) {
       Object.defineProperty(
-        sprite, 
-        "gx", 
-        {
-          get() {return sprite.getGlobalPosition().x;}
+        sprite,
+        "gx", {
+          get() {
+            return sprite.getGlobalPosition().x;
+          }
         }
       );
-    } 
+    }
 
     if (sprite.gy === undefined) {
       Object.defineProperty(
-        sprite, 
-        "gy", 
-        {
-          get() {return sprite.getGlobalPosition().y;}
+        sprite,
+        "gy", {
+          get() {
+            return sprite.getGlobalPosition().y;
+          }
         }
       );
-    } 
+    }
   }
 
   //A method that implments drag-and-drop functionality 
@@ -396,8 +413,8 @@ export class Tink {
               break;
             }
           }
-        } 
-        
+        }
+
         //If the pointer is down and it has a `dragSprite`, make the sprite follow the pointer's
         //position, with the calculated offset
         else {
@@ -415,10 +432,10 @@ export class Tink {
       //draggable sprite
       draggableSprites.some(sprite => {
         if (pointer.hitTestSprite(sprite) && sprite.draggable) {
-          pointer.cursor = "pointer";
+          if (!pointer.hidden) pointer.cursor = "pointer";
           return true;
         } else {
-          pointer.cursor = "auto";
+          if (!pointer.hidden) pointer.cursor = "auto";
           return false;
         }
       });
@@ -512,7 +529,7 @@ export class Tink {
             //Show the third frame if this sprite is a `Button` sprite and it
             //has only three frames, or show the second frame if it
             //only has two frames
-            if(o.tinkType === "button") {
+            if (o.tinkType === "button") {
               if (o.totalFrames === 3) {
                 o.gotoAndStop(2);
               } else {
@@ -522,9 +539,9 @@ export class Tink {
           }
 
           //Change the pointer icon to a hand
-          pointer.cursor = "pointer";
+          if (!pointer.hidden) pointer.cursor = "pointer";
         } else {
-          pointer.cursor = "auto";
+          if (!pointer.hidden) pointer.cursor = "auto";
         }
 
         //Perform the correct interactive action
@@ -586,18 +603,17 @@ export class Tink {
     let o;
 
     //Is it an array of frame ids or textures?
-    if(typeof source[0] === "string") {
+    if (typeof source[0] === "string") {
 
       //They're strings, but are they pre-existing texture or
       //paths to image files?
       //Check to see if the first element matches a texture in the
       //cache
-      if(this.TextureCache[source[0]]){
+      if (this.TextureCache[source[0]]) {
 
         //It does, so it's an array of frame ids
         o = this.MovieClip.fromFrames(source);
-      }
-      else {
+      } else {
 
         //It's not already in the cache, so let's load it
         o = this.MovieClip.fromImages(source);
@@ -630,7 +646,7 @@ export class Tink {
   //Run the `udpate` function in your game loop
   //to update all of Tink's interactive objects
   update() {
-    
+
     //Update the drag and drop system
     if (this.draggableSprites.length !== 0) this.updateDragAndDrop(this.draggableSprites);
 

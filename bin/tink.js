@@ -1,9 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -117,6 +113,20 @@ var Tink = (function () {
         //The drag offsets to help drag sprites
         dragOffsetX: 0,
         dragOffsetY: 0,
+
+        //A property to check whether or not the pointer
+        //is hidden
+        hidden: false,
+
+        //Methods to hide and show the pointer
+        hide: function hide() {
+          this.hidden = true;
+          this.cursor = "none";
+        },
+        show: function show() {
+          this.hidden = false;
+          this.cursor = "auto";
+        },
 
         //The pointer's mouse `moveHandler`
         moveHandler: function moveHandler(event) {
@@ -308,7 +318,10 @@ var Tink = (function () {
           //contain the pointer's position
 
           get: function () {
-            return { x: this.x, y: this.y };
+            return {
+              x: this.x,
+              y: this.y
+            };
           },
           configurable: true,
           enumerable: true
@@ -461,10 +474,10 @@ var Tink = (function () {
         //draggable sprite
         draggableSprites.some(function (sprite) {
           if (pointer.hitTestSprite(sprite) && sprite.draggable) {
-            pointer.cursor = "pointer";
+            if (!pointer.hidden) pointer.cursor = "pointer";
             return true;
           } else {
-            pointer.cursor = "auto";
+            if (!pointer.hidden) pointer.cursor = "auto";
             return false;
           }
         });
@@ -572,9 +585,9 @@ var Tink = (function () {
             }
 
             //Change the pointer icon to a hand
-            pointer.cursor = "pointer";
+            if (!pointer.hidden) pointer.cursor = "pointer";
           } else {
-            pointer.cursor = "auto";
+            if (!pointer.hidden) pointer.cursor = "auto";
           }
 
           //Perform the correct interactive action
@@ -755,6 +768,4 @@ var Tink = (function () {
 
   return Tink;
 })();
-
-exports.Tink = Tink;
 //# sourceMappingURL=tink.js.map
