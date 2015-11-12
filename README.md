@@ -10,8 +10,19 @@ rendering engine. You can use Tink to easily create:
   mouse.
 - Interactive sprites that behave like buttons.
 
+[Setting up](#settingup) <br>
+[A universal pointer](#auniversalpointer) <br>
+[Pointer interaction with sprites](#pointerinteractionwithsprites) <br>
+[Drag and drop sprites](#draganddropsprites) <br>
+[Buttons](#buttons) <br>
+[Making buttons](#makingbuttons) <br>
+[Making an interactive sprite](#makinganinteractivesprite) <br>
+[Keyboard control](#keyboardcontrol) <br>
+[Setting Tink's optional scale](#scale) <br>
+
 Let's find out how to use Tink.
 
+<a id="settingup"></a>
 Setting up
 ----------
 
@@ -46,6 +57,7 @@ function gameLoop(){
 ```
 This is what you need to do to get started with the examples ahead.
 
+<a id="auniversalpointer"></a>
 A universal pointer
 -------------------
 
@@ -99,6 +111,7 @@ pointer.visible = false;
 pointer.visible = true;
 ```
 
+<a id="pointerinteractionwithsprites"></a>
 Pointer interaction with sprites
 --------------------------------
 
@@ -147,6 +160,7 @@ renderer.view.style.cursor = "cursorStyle";
 These cursor styles will only be visible on a mouse-based interface; 
 on a touch interface they're ignored.
 
+<a id="draganddropsprites"></a>
 Drag and drop sprites
 ---------------------
 
@@ -181,6 +195,7 @@ Drag-and-drop is a fundamental interactive feature that can be used as
 the basis for making puzzles games, matching games, or sophisticated 
 user interfaces. 
 
+<a id="buttons"></a>
 Buttons
 -------
 Buttons are an important UI component that you'll definitely want to use 
@@ -235,6 +250,7 @@ playButton.action
 ```
 Got it? Good! So how do we actually make buttons?
 
+<a id="makingbuttons"></a>
 ###Making buttons
 
 First, start with three images that define the three button states. 
@@ -291,6 +307,7 @@ application.
 At its heart, a button is just an ordinary Pixi `MovieClip` with extra properties 
 and methods, so you can treat it like any other `MovieClip`object.
 
+<a id="makinganinteractivesprite"></a>
 Making an interactive sprite
 ----------------------------
 
@@ -313,6 +330,56 @@ anySprite.release = () => {
 ```
 If you want any sprite to behave like a button, use `makeInteractive`!
 
+<a id="keyboardcontrol"></a>
+Keyboard control
+----------------
+
+`keyboard` is a method that listens for and captures keyboard events. It's really
+just a convenient wrapper function for HTML `keyup` and `keydown` events 
+so that you can keep your application code clutter-free and easier to write and read.
+Here's how to use the `keyboard` method. Create a new keyboard object like this:
+```js
+let keyObject = t.keyboard(asciiKeyCodeNumber);
+```
+Its one argument is the ASCII key code number of the keyboard key
+that you want to listen for. [Here's a list of ASCII key codes you can
+use](http://www.asciitable.com).
+Then assign `press` and `release` methods to the keyboard object like this:
+```js
+keyObject.press = () => {
+  //key object pressed
+};
+keyObject.release = () => {
+  //key object released
+};
+```
+Keyboard objects also have `isDown` and `isUp` Boolean properties that you can use to 
+check the state of each key.
+
+Tink has another convenience method called `arrowControl` that lets you 
+quickly create a 4 direction controller for sprites using the
+keyboard arrow keys. It's useful for quickly prototyping game ideas.
+Supply the `arrowControl` method with the sprite you want to control
+and the pixels per frame that you want it to move:
+```js
+t.arrowControl(anySprite, 5);
+```
+Then just update your sprite's velocity inside your game loop, like
+this:
+```js
+function gameLoop() {
+  requestAnimationFrame(gameLoop);
+
+  anySprite.x += vx;
+  anySprite.y += vy
+}
+```
+You'll then be able to move the sprite in all four directions using
+the arrow keys.
+(For the `arrowControl` method to work, your sprite needs to have `vx` and `vy` properties
+that refer to the sprite's velocity.) 
+
+<a id="scale"></a>
 Setting Tink's optional scale
 -----------------------------
 

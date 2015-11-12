@@ -118,14 +118,6 @@ var Tink = (function () {
         //is visible
         _visible: true,
 
-        //Methods to hide and show the pointer
-        hide: function hide() {
-          this.hidden = true;
-        },
-        show: function show() {
-          this.hidden = false;
-        },
-
         //The pointer's mouse `moveHandler`
         moveHandler: function moveHandler(event) {
 
@@ -778,6 +770,66 @@ var Tink = (function () {
 
       //Return the key object
       return key;
+    }
+  }, {
+    key: "arrowControl",
+
+    //`arrowControl` is a convenience method for updating a sprite's velocity
+    //for 4-way movement using the arrow directional keys. Supply it
+    //with the sprite you want to control and the speed per frame, in
+    //pixels, that you want to update the sprite's velocity
+    value: function arrowControl(sprite, speed) {
+
+      if (speed === undefined) {
+        throw new Error("Please supply the arrowControl method with the speed at which you want the sprite to move");
+      }
+
+      var upArrow = this.keyboard(38),
+          rightArrow = this.keyboard(39),
+          downArrow = this.keyboard(40),
+          leftArrow = this.keyboard(37);
+
+      //Assign key `press` methods
+      leftArrow.press = function () {
+        //Change the sprite's velocity when the key is pressed
+        sprite.vx = -speed;
+        sprite.vy = 0;
+      };
+      leftArrow.release = function () {
+        //If the left arrow has been released, and the right arrow isn't down,
+        //and the sprite isn't moving vertically:
+        //Stop the sprite
+        if (!rightArrow.isDown && sprite.vy === 0) {
+          sprite.vx = 0;
+        }
+      };
+      upArrow.press = function () {
+        sprite.vy = -speed;
+        sprite.vx = 0;
+      };
+      upArrow.release = function () {
+        if (!downArrow.isDown && sprite.vx === 0) {
+          sprite.vy = 0;
+        }
+      };
+      rightArrow.press = function () {
+        sprite.vx = speed;
+        sprite.vy = 0;
+      };
+      rightArrow.release = function () {
+        if (!leftArrow.isDown && sprite.vy === 0) {
+          sprite.vx = 0;
+        }
+      };
+      downArrow.press = function () {
+        sprite.vy = speed;
+        sprite.vx = 0;
+      };
+      downArrow.release = function () {
+        if (!upArrow.isDown && sprite.vx === 0) {
+          sprite.vy = 0;
+        }
+      };
     }
   }]);
 

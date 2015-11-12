@@ -140,14 +140,6 @@ class Tink {
         this._visible = value;
       },
 
-      //Methods to hide and show the pointer
-      hide() {
-        this.hidden = true;
-      },
-      show() {
-        this.hidden = false;
-      },
-
       //The pointer's mouse `moveHandler`
       moveHandler(event) {
 
@@ -727,4 +719,62 @@ class Tink {
     //Return the key object
     return key;
   }
+
+  //`arrowControl` is a convenience method for updating a sprite's velocity
+  //for 4-way movement using the arrow directional keys. Supply it
+  //with the sprite you want to control and the speed per frame, in
+  //pixels, that you want to update the sprite's velocity
+  arrowControl(sprite, speed) {
+
+    if (speed === undefined) {
+      throw new Error("Please supply the arrowControl method with the speed at which you want the sprite to move");
+    } 
+
+    let upArrow = this.keyboard(38),
+        rightArrow = this.keyboard(39),
+        downArrow = this.keyboard(40),
+        leftArrow = this.keyboard(37);
+
+    //Assign key `press` methods
+    leftArrow.press = () => {
+      //Change the sprite's velocity when the key is pressed
+      sprite.vx = -speed;
+      sprite.vy = 0;
+    };
+    leftArrow.release = () => {
+      //If the left arrow has been released, and the right arrow isn't down,
+      //and the sprite isn't moving vertically: 
+      //Stop the sprite
+      if (!rightArrow.isDown && sprite.vy === 0) {
+        sprite.vx = 0;
+      }
+    };
+    upArrow.press = () => {
+      sprite.vy = -speed;
+      sprite.vx = 0;
+    };
+    upArrow.release = () => {
+      if (!downArrow.isDown && sprite.vx === 0) {
+        sprite.vy = 0;
+      }
+    };
+    rightArrow.press = () => {
+      sprite.vx = speed;
+      sprite.vy = 0;
+    };
+    rightArrow.release = () => {
+      if (!leftArrow.isDown && sprite.vy === 0) {
+        sprite.vx = 0;
+      }
+    };
+    downArrow.press = () => {
+      sprite.vy = speed;
+      sprite.vx = 0;
+    };
+    downArrow.release = () => {
+      if (!upArrow.isDown && sprite.vx === 0) {
+        sprite.vy = 0;
+      }
+    };
+  }  
 }
