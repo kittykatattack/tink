@@ -6,7 +6,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Tink = (function () {
   function Tink(PIXI, element) {
-    var scale = arguments[2] === undefined ? 1 : arguments[2];
+    var scale = arguments.length <= 2 || arguments[2] === undefined ? 1 : arguments[2];
 
     _classCallCheck(this, Tink);
 
@@ -34,11 +34,11 @@ var Tink = (function () {
     this.Texture = this.PIXI.Texture;
   }
 
+  //`makeDraggable` lets you make a drag-and-drop sprite by pushing it
+  //into the `draggableSprites` array
+
   _createClass(Tink, [{
     key: "makeDraggable",
-
-    //`makeDraggable` lets you make a drag-and-drop sprite by pushing it
-    //into the `draggableSprites` array
     value: function makeDraggable() {
       var _this = this;
 
@@ -46,16 +46,44 @@ var Tink = (function () {
         sprites[_key] = arguments[_key];
       }
 
-      sprites.forEach(function (sprite) {
-        _this.draggableSprites.push(sprite);
-        sprite.draggable = true;
-      });
+      //If the first argument isn't an array of sprites...
+      if (!(sprites[0] instanceof Array)) {
+        sprites.forEach(function (sprite) {
+          _this.draggableSprites.push(sprite);
+
+          //If the sprite's `draggable` property hasn't already been defined by
+          //another library, like Hexi, define it
+          if (sprite.draggable === undefined) {
+            sprite.draggable = true;
+            sprite._localDraggableAllocation = true;
+          }
+        });
+      }
+
+      //If the first argument is an array of sprites...
+      else {
+          var spritesArray = sprites[0];
+          if (spritesArray.length > 0) {
+            for (var i = spritesArray.length - 1; i >= 0; i--) {
+              var sprite = spritesArray[i];
+              this.draggableSprites.push(sprite);
+
+              //If the sprite's `draggable` property hasn't already been defined by
+              //another library, like Hexi, define it
+              if (sprite.draggable === undefined) {
+                sprite.draggable = true;
+                sprite._localDraggableAllocation = true;
+              }
+            }
+          }
+        }
     }
-  }, {
-    key: "makeUndraggable",
 
     //`makeUndraggable` removes the sprite from the `draggableSprites`
     //array
+
+  }, {
+    key: "makeUndraggable",
     value: function makeUndraggable() {
       var _this2 = this;
 
@@ -63,16 +91,31 @@ var Tink = (function () {
         sprites[_key2] = arguments[_key2];
       }
 
-      sprites.forEach(function (sprite) {
-        _this2.draggableSprites.splice(_this2.draggableSprites.indexOf(sprite), 1);
-        sprite.undraggable = false;
-      });
+      //If the first argument isn't an array of sprites...
+      if (!(sprites[0] instanceof Array)) {
+        sprites.forEach(function (sprite) {
+          _this2.draggableSprites.splice(_this2.draggableSprites.indexOf(sprite), 1);
+          if (sprite._localDraggableAllocation === true) sprite.draggable = false;
+        });
+      }
+
+      //If the first argument is an array of sprites
+      else {
+          var spritesArray = sprites[0];
+          if (spritesArray.length > 0) {
+            for (var i = spritesArray.length - 1; i >= 0; i--) {
+              var sprite = spritesArray[i];
+              this.draggableSprites.splice(this.draggableSprites.indexOf(sprite), 1);
+              if (sprite._localDraggableAllocation === true) sprite.draggable = false;
+            }
+          }
+        }
     }
   }, {
     key: "makePointer",
     value: function makePointer() {
-      var element = arguments[0] === undefined ? this.element : arguments[0];
-      var scale = arguments[1] === undefined ? this.scale : arguments[1];
+      var element = arguments.length <= 0 || arguments[0] === undefined ? this.element : arguments[0];
+      var scale = arguments.length <= 1 || arguments[1] === undefined ? this.scale : arguments[1];
 
       //Get a reference to Tink's global `draggableSprites` array
       var draggableSprites = this.draggableSprites;
@@ -81,7 +124,7 @@ var Tink = (function () {
       var addGlobalPositionProperties = this.addGlobalPositionProperties;
 
       //The pointer object will be returned by this function
-      var pointer = Object.defineProperties({
+      var pointer = {
         element: element,
         scale: scale,
 
@@ -92,6 +135,46 @@ var Tink = (function () {
         //Width and height
         width: 1,
         height: 1,
+
+        //The public x and y properties are divided by the scale. If the
+        //HTML element that the pointer is sensitive to (like the canvas)
+        //is scaled up or down, you can change the `scale` value to
+        //correct the pointer's position values
+        get x() {
+          return this._x / this.scale;
+        },
+        get y() {
+          return this._y / this.scale;
+        },
+
+        //Add `centerX` and `centerY` getters so that we
+        //can use the pointer's coordinates with easing
+        //and collision functions
+        get centerX() {
+          return this.x;
+        },
+        get centerY() {
+          return this.y;
+        },
+
+        //`position` returns an object with x and y properties that
+        //contain the pointer's position
+        get position() {
+          return {
+            x: this.x,
+            y: this.y
+          };
+        },
+
+        //Add a `cursor` getter/setter to change the pointer's cursor
+        //style. Values can be "pointer" (for a hand icon) or "auto" for
+        //an ordinary arrow icon.
+        get cursor() {
+          return this.element.style.cursor;
+        },
+        set cursor(value) {
+          this.element.style.cursor = value;
+        },
 
         //Booleans to track the pointer state
         isDown: false,
@@ -117,6 +200,17 @@ var Tink = (function () {
         //A property to check whether or not the pointer
         //is visible
         _visible: true,
+        get visible() {
+          return this._visible;
+        },
+        set visible(value) {
+          if (value === true) {
+            this.cursor = "auto";
+          } else {
+            this.cursor = "none";
+          }
+          this._visible = value;
+        },
 
         //The pointer's mouse `moveHandler`
         moveHandler: function moveHandler(event) {
@@ -240,113 +334,31 @@ var Tink = (function () {
             //coordinates
             var left = sprite.gx,
                 right = sprite.gx + sprite.width,
-                _top = sprite.gy,
+                top = sprite.gy,
                 bottom = sprite.gy + sprite.height;
 
             //Find out if the pointer is intersecting the rectangle.
             //`hit` will become `true` if the pointer is inside the
             //sprite's area
-            hit = this.x > left && this.x < right && this.y > _top && this.y < bottom;
+            hit = this.x > left && this.x < right && this.y > top && this.y < bottom;
           }
 
           //Is the sprite circular?
           else {
 
-            //Find the distance between the pointer and the
-            //center of the circle
-            var vx = this.x - (sprite.gx + sprite.width / 2),
-                vy = this.y - (sprite.gy + sprite.width / 2),
-                distance = Math.sqrt(vx * vx + vy * vy);
+              //Find the distance between the pointer and the
+              //center of the circle
+              var vx = this.x - (sprite.gx + sprite.width / 2),
+                  vy = this.y - (sprite.gy + sprite.width / 2),
+                  distance = Math.sqrt(vx * vx + vy * vy);
 
-            //The pointer is intersecting the circle if the
-            //distance is less than the circle's radius
-            hit = distance < sprite.width / 2;
-          }
+              //The pointer is intersecting the circle if the
+              //distance is less than the circle's radius
+              hit = distance < sprite.width / 2;
+            }
           return hit;
         }
-      }, {
-        x: { //The public x and y properties are divided by the scale. If the
-          //HTML element that the pointer is sensitive to (like the canvas)
-          //is scaled up or down, you can change the `scale` value to
-          //correct the pointer's position values
-
-          get: function () {
-            return this._x / this.scale;
-          },
-          configurable: true,
-          enumerable: true
-        },
-        y: {
-          get: function () {
-            return this._y / this.scale;
-          },
-          configurable: true,
-          enumerable: true
-        },
-        centerX: {
-
-          //Add `centerX` and `centerY` getters so that we
-          //can use the pointer's coordinates with easing
-          //and collision functions
-
-          get: function () {
-            return this.x;
-          },
-          configurable: true,
-          enumerable: true
-        },
-        centerY: {
-          get: function () {
-            return this.y;
-          },
-          configurable: true,
-          enumerable: true
-        },
-        position: {
-
-          //`position` returns an object with x and y properties that
-          //contain the pointer's position
-
-          get: function () {
-            return {
-              x: this.x,
-              y: this.y
-            };
-          },
-          configurable: true,
-          enumerable: true
-        },
-        cursor: {
-
-          //Add a `cursor` getter/setter to change the pointer's cursor
-          //style. Values can be "pointer" (for a hand icon) or "auto" for
-          //an ordinary arrow icon.
-
-          get: function () {
-            return this.element.style.cursor;
-          },
-          set: function (value) {
-            this.element.style.cursor = value;
-          },
-          configurable: true,
-          enumerable: true
-        },
-        visible: {
-          get: function () {
-            return this._visible;
-          },
-          set: function (value) {
-            if (value === true) {
-              this.cursor = "auto";
-            } else {
-              this.cursor = "none";
-            }
-            this._visible = value;
-          },
-          configurable: true,
-          enumerable: true
-        }
-      });
+      };
 
       //Bind the events to the handlers
       //Mouse events
@@ -374,13 +386,14 @@ var Tink = (function () {
       //Return the pointer
       return pointer;
     }
-  }, {
-    key: "addGlobalPositionProperties",
 
     //Many of Tink's objects, like pointers, use collision
     //detection using the sprites' global x and y positions. To make
     //this easier, new `gx` and `gy` properties are added to sprites
     //that reference Pixi sprites' `getGlobalPosition()` values.
+
+  }, {
+    key: "addGlobalPositionProperties",
     value: function addGlobalPositionProperties(sprite) {
       if (sprite.gx === undefined) {
         Object.defineProperty(sprite, "gx", {
@@ -398,11 +411,12 @@ var Tink = (function () {
         });
       }
     }
-  }, {
-    key: "updateDragAndDrop",
 
     //A method that implments drag-and-drop functionality
     //for each pointer
+
+  }, {
+    key: "updateDragAndDrop",
     value: function updateDragAndDrop(draggableSprites) {
 
       //Create a pointer if one doesn't already exist
@@ -465,9 +479,9 @@ var Tink = (function () {
           //If the pointer is down and it has a `dragSprite`, make the sprite follow the pointer's
           //position, with the calculated offset
           else {
-            pointer.dragSprite.x = pointer.x - pointer.dragOffsetX;
-            pointer.dragSprite.y = pointer.y - pointer.dragOffsetY;
-          }
+              pointer.dragSprite.x = pointer.x - pointer.dragOffsetX;
+              pointer.dragSprite.y = pointer.y - pointer.dragOffsetY;
+            }
         }
 
         //If the pointer is up, drop the `dragSprite` by setting it to `null`
@@ -479,10 +493,10 @@ var Tink = (function () {
         //draggable sprite
         draggableSprites.some(function (sprite) {
           if (pointer.hitTestSprite(sprite) && sprite.draggable) {
-            if (!pointer.visible) pointer.cursor = "pointer";
+            if (pointer.visible) pointer.cursor = "pointer";
             return true;
           } else {
-            if (!pointer.visible) pointer.cursor = "auto";
+            if (pointer.visible) pointer.cursor = "auto";
             return false;
           }
         });
@@ -526,11 +540,12 @@ var Tink = (function () {
       //be updated each frame in the `updateButtons method
       this.buttons.push(o);
     }
-  }, {
-    key: "updateButtons",
 
     //The `updateButtons` method will be called each frame
     //inside the game loop. It updates all the button-like sprites
+
+  }, {
+    key: "updateButtons",
     value: function updateButtons() {
       var _this3 = this;
 
@@ -647,14 +662,15 @@ var Tink = (function () {
         });
       });
     }
-  }, {
-    key: "button",
 
     //A function that creates a sprite with 3 frames that
     //represent the button states: up, over and down
+
+  }, {
+    key: "button",
     value: function button(source) {
-      var x = arguments[1] === undefined ? 0 : arguments[1];
-      var y = arguments[2] === undefined ? 0 : arguments[2];
+      var x = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+      var y = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
       //The sprite object that will be returned
       var o = undefined;
@@ -681,10 +697,10 @@ var Tink = (function () {
       //it's an array of textures
       else if (source[0] instanceof this.Texture) {
 
-        //Yes, it's an array of textures.
-        //Use them to make a MovieClip o
-        o = new this.MovieClip(source);
-      }
+          //Yes, it's an array of textures.
+          //Use them to make a MovieClip o
+          o = new this.MovieClip(source);
+        }
 
       //Add interactive properties to the button
       this.makeInteractive(o);
@@ -699,11 +715,12 @@ var Tink = (function () {
       //Return the new button sprite
       return o;
     }
-  }, {
-    key: "update",
 
     //Run the `udpate` function in your game loop
     //to update all of Tink's interactive objects
+
+  }, {
+    key: "update",
     value: function update() {
 
       //Update the drag and drop system
@@ -712,8 +729,6 @@ var Tink = (function () {
       //Update the buttons and button-like interactive sprites
       if (this.buttons.length !== 0) this.updateButtons();
     }
-  }, {
-    key: "keyboard",
 
     /*
     `keyboard` is a method that listens for and captures keyboard events. It's really
@@ -736,6 +751,9 @@ var Tink = (function () {
     ```
     Keyboard objects also have `isDown` and `isUp` Boolean properties that you can use to check the state of each key. 
     */
+
+  }, {
+    key: "keyboard",
     value: function keyboard(keyCode) {
       var key = {};
       key.code = keyCode;
@@ -771,13 +789,14 @@ var Tink = (function () {
       //Return the key object
       return key;
     }
-  }, {
-    key: "arrowControl",
 
     //`arrowControl` is a convenience method for updating a sprite's velocity
     //for 4-way movement using the arrow directional keys. Supply it
     //with the sprite you want to control and the speed per frame, in
     //pixels, that you want to update the sprite's velocity
+
+  }, {
+    key: "arrowControl",
     value: function arrowControl(sprite, speed) {
 
       if (speed === undefined) {

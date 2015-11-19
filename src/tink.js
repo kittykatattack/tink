@@ -28,19 +28,63 @@ class Tink {
   //`makeDraggable` lets you make a drag-and-drop sprite by pushing it
   //into the `draggableSprites` array
   makeDraggable(...sprites) {
-    sprites.forEach(sprite => {
-      this.draggableSprites.push(sprite);
-      sprite.draggable = true;
-    });
+
+    //If the first argument isn't an array of sprites...
+    if (!(sprites[0] instanceof Array)) {
+      sprites.forEach(sprite => {
+        this.draggableSprites.push(sprite);
+
+        //If the sprite's `draggable` property hasn't already been defined by
+        //another library, like Hexi, define it
+        if (sprite.draggable === undefined) {
+          sprite.draggable = true;
+          sprite._localDraggableAllocation = true;
+        }
+      });
+    }
+
+    //If the first argument is an array of sprites...
+    else {
+      let spritesArray = sprites[0];
+      if (spritesArray.length > 0) {
+        for (let i = spritesArray.length - 1; i >= 0; i--) {
+          let sprite = spritesArray[i];
+          this.draggableSprites.push(sprite);
+
+          //If the sprite's `draggable` property hasn't already been defined by
+          //another library, like Hexi, define it
+          if (sprite.draggable === undefined) {
+            sprite.draggable = true;
+            sprite._localDraggableAllocation = true;
+          }
+        }
+      }
+    }
   }
 
   //`makeUndraggable` removes the sprite from the `draggableSprites`
   //array
   makeUndraggable(...sprites) {
-    sprites.forEach(sprite => {
-      this.draggableSprites.splice(this.draggableSprites.indexOf(sprite), 1);
-      sprite.undraggable = false;
-    });
+
+    //If the first argument isn't an array of sprites...
+    if (!(sprites[0] instanceof Array)) {
+      sprites.forEach(sprite => {
+        this.draggableSprites.splice(this.draggableSprites.indexOf(sprite), 1);
+        if (sprite._localDraggableAllocation === true) sprite.draggable = false;
+      });
+    }
+
+    //If the first argument is an array of sprites
+    else{
+      let spritesArray = sprites[0];
+      if (spritesArray.length > 0) {
+        for (let i = spritesArray.length - 1; i >= 0; i--) {
+          let sprite = spritesArray[i];
+          this.draggableSprites.splice(this.draggableSprites.indexOf(sprite), 1);
+          if (sprite._localDraggableAllocation === true) sprite.draggable = false;
+        }
+      }
+    }
   }
 
   makePointer(element = this.element, scale = this.scale) {
@@ -433,10 +477,10 @@ class Tink {
       //draggable sprite
       draggableSprites.some(sprite => {
         if (pointer.hitTestSprite(sprite) && sprite.draggable) {
-          if (!pointer.visible) pointer.cursor = "pointer";
+          if (pointer.visible) pointer.cursor = "pointer";
           return true;
         } else {
-          if (!pointer.visible) pointer.cursor = "auto";
+          if (pointer.visible) pointer.cursor = "auto";
           return false;
         }
       });
