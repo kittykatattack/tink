@@ -299,15 +299,25 @@ class Tink {
         //touching the sprite and remain `false` if it isn't
         let hit = false;
 
+        //Find out the sprite's offset from its anchor point
+        let xAnchorOffset, yAnchorOffset;
+        if (sprite.anchor !== undefined) {
+          xAnchorOffset = sprite.width * sprite.anchor.x;
+          yAnchorOffset = sprite.height * sprite.anchor.y;
+        } else {
+          xAnchorOffset = 0;
+          yAnchorOffset = 0;
+        }
+
         //Is the sprite rectangular?
         if (!sprite.circular) {
 
           //Get the position of the sprite's edges using global
           //coordinates
-          let left = sprite.gx,
-            right = sprite.gx + sprite.width,
-            top = sprite.gy,
-            bottom = sprite.gy + sprite.height;
+          let left = sprite.gx - xAnchorOffset,
+            right = sprite.gx + sprite.width - xAnchorOffset,
+            top = sprite.gy - yAnchorOffset,
+            bottom = sprite.gy + sprite.height - yAnchorOffset;
 
           //Find out if the pointer is intersecting the rectangle.
           //`hit` will become `true` if the pointer is inside the
@@ -320,8 +330,8 @@ class Tink {
 
           //Find the distance between the pointer and the
           //center of the circle
-          let vx = this.x - (sprite.gx + sprite.width / 2),
-            vy = this.y - (sprite.gy + sprite.width / 2),
+          let vx = this.x - (sprite.gx + (sprite.width / 2) - xAnchorOffset),
+            vy = this.y - (sprite.gy + (sprite.width / 2) - yAnchorOffset),
             distance = Math.sqrt(vx * vx + vy * vy);
 
           //The pointer is intersecting the circle if the
