@@ -547,6 +547,10 @@ var Tink = (function () {
       //user creates an object using the `button` function
       o.tinkType = "";
 
+      //Set `enabled` to true to allow for interactivity
+      //Set `enabled` to false to disable interactivity
+      o.enabled = true;
+
       //Add the sprite to the global `buttons` array so that it can
       //be updated each frame in the `updateButtons method
       this.buttons.push(o);
@@ -569,108 +573,112 @@ var Tink = (function () {
       //using the `makeInteractive` method
       this.buttons.forEach(function (o) {
 
-        //Loop through all of Tink's pointers (there will usually
-        //just be one)
-        _this3.pointers.forEach(function (pointer) {
+        //Only do this if the interactive object is enabled
+        if (o.enabled) {
 
-          //Figure out if the pointer is touching the sprite
-          var hit = pointer.hitTestSprite(o);
+          //Loop through all of Tink's pointers (there will usually
+          //just be one)
+          _this3.pointers.forEach(function (pointer) {
 
-          //1. Figure out the current state
-          if (pointer.isUp) {
+            //Figure out if the pointer is touching the sprite
+            var hit = pointer.hitTestSprite(o);
 
-            //Up state
-            o.state = "up";
+            //1. Figure out the current state
+            if (pointer.isUp) {
 
-            //Show the first image state frame, if this is a `Button` sprite
-            if (o.tinkType === "button") o.gotoAndStop(0);
-          }
+              //Up state
+              o.state = "up";
 
-          //If the pointer is touching the sprite, figure out
-          //if the over or down state should be displayed
-          if (hit) {
-
-            //Over state
-            o.state = "over";
-
-            //Show the second image state frame if this sprite has
-            //3 frames and it's a `Button` sprite
-            if (o.totalFrames && o.totalFrames === 3 && o.tinkType === "button") {
-              o.gotoAndStop(1);
+              //Show the first image state frame, if this is a `Button` sprite
+              if (o.tinkType === "button") o.gotoAndStop(0);
             }
 
-            //Down state
-            if (pointer.isDown) {
-              o.state = "down";
+            //If the pointer is touching the sprite, figure out
+            //if the over or down state should be displayed
+            if (hit) {
 
-              //Show the third frame if this sprite is a `Button` sprite and it
-              //has only three frames, or show the second frame if it
-              //only has two frames
-              if (o.tinkType === "button") {
-                if (o.totalFrames === 3) {
-                  o.gotoAndStop(2);
-                } else {
-                  o.gotoAndStop(1);
+              //Over state
+              o.state = "over";
+
+              //Show the second image state frame if this sprite has
+              //3 frames and it's a `Button` sprite
+              if (o.totalFrames && o.totalFrames === 3 && o.tinkType === "button") {
+                o.gotoAndStop(1);
+              }
+
+              //Down state
+              if (pointer.isDown) {
+                o.state = "down";
+
+                //Show the third frame if this sprite is a `Button` sprite and it
+                //has only three frames, or show the second frame if it
+                //only has two frames
+                if (o.tinkType === "button") {
+                  if (o.totalFrames === 3) {
+                    o.gotoAndStop(2);
+                  } else {
+                    o.gotoAndStop(1);
+                  }
                 }
+              }
+
+              //Change the pointer icon to a hand
+              if (pointer.visible) pointer.cursor = "pointer";
+            } else {
+              //Turn the pointer to an ordinary arrow icon if the
+              //pointer isn't touching a sprite
+              if (pointer.visible) pointer.cursor = "auto";
+            }
+
+            //Perform the correct interactive action
+
+            //a. Run the `press` method if the sprite state is "down" and
+            //the sprite hasn't already been pressed
+            if (o.state === "down") {
+              if (!o.pressed) {
+                if (o.press) o.press();
+                o.pressed = true;
+                o.action = "pressed";
               }
             }
 
-            //Change the pointer icon to a hand
-            if (pointer.visible) pointer.cursor = "pointer";
-          } else {
-            //Turn the pointer to an ordinary arrow icon if the
-            //pointer isn't touching a sprite
-            if (pointer.visible) pointer.cursor = "auto";
-          }
+            //b. Run the `release` method if the sprite state is "over" and
+            //the sprite has been pressed
+            if (o.state === "over") {
+              if (o.pressed) {
+                if (o.release) o.release();
+                o.pressed = false;
+                o.action = "released";
+                //If the pointer was tapped and the user assigned a `tap`
+                //method, call the `tap` method
+                if (pointer.tapped && o.tap) o.tap();
+              }
 
-          //Perform the correct interactive action
-
-          //a. Run the `press` method if the sprite state is "down" and
-          //the sprite hasn't already been pressed
-          if (o.state === "down") {
-            if (!o.pressed) {
-              if (o.press) o.press();
-              o.pressed = true;
-              o.action = "pressed";
-            }
-          }
-
-          //b. Run the `release` method if the sprite state is "over" and
-          //the sprite has been pressed
-          if (o.state === "over") {
-            if (o.pressed) {
-              if (o.release) o.release();
-              o.pressed = false;
-              o.action = "released";
-              //If the pointer was tapped and the user assigned a `tap`
-              //method, call the `tap` method
-              if (pointer.tapped && o.tap) o.tap();
+              //Run the `over` method if it has been assigned
+              if (!o.hoverOver) {
+                if (o.over) o.over();
+                o.hoverOver = true;
+              }
             }
 
-            //Run the `over` method if it has been assigned
-            if (!o.hoverOver) {
-              if (o.over) o.over();
-              o.hoverOver = true;
-            }
-          }
+            //c. Check whether the pointer has been released outside
+            //the sprite's area. If the button state is "up" and it's
+            //already been pressed, then run the `release` method.
+            if (o.state === "up") {
+              if (o.pressed) {
+                if (o.release) o.release();
+                o.pressed = false;
+                o.action = "released";
+              }
 
-          //c. Check whether the pointer has been released outside
-          //the sprite's area. If the button state is "up" and it's
-          //already been pressed, then run the `release` method.
-          if (o.state === "up") {
-            if (o.pressed) {
-              if (o.release) o.release();
-              o.pressed = false;
-              o.action = "released";
+              //Run the `out` method if it has been assigned
+              if (o.hoverOver) {
+                if (o.out) o.out();
+                o.hoverOver = false;
+              }
             }
-
-            //Run the `out` method if it has been assigned
-            if (o.hoverOver) {
-              if (o.out) o.out();
-              o.hoverOver = false;
-            }
-          }
-        });
+          });
+        }
       });
     }
 
