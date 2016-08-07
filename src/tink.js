@@ -1,6 +1,7 @@
 class Tink {
   constructor(PIXI, element, scale = 1) {
 
+    console.log(element)
     //Add element and scale properties
     this.element = element;
     this.scale = scale;
@@ -75,7 +76,7 @@ class Tink {
     }
 
     //If the first argument is an array of sprites
-    else{
+    else {
       let spritesArray = sprites[0];
       if (spritesArray.length > 0) {
         for (let i = spritesArray.length - 1; i >= 0; i--) {
@@ -98,7 +99,7 @@ class Tink {
     //The pointer object will be returned by this function
     let pointer = {
       element: element,
-      scale: scale,
+      _scale: scale,
 
       //Private x and y properties
       _x: 0,
@@ -136,6 +137,13 @@ class Tink {
           x: this.x,
           y: this.y
         };
+      },
+
+      get scale() {
+        return this._scale;
+      },
+      set scale(value) {
+        this._scale = value;
       },
 
       //Add a `cursor` getter/setter to change the pointer's cursor
@@ -178,7 +186,7 @@ class Tink {
       set visible(value) {
         if (value === true) {
           this.cursor = "auto";
-        } else {  
+        } else {
           this.cursor = "none";
         }
         this._visible = value;
@@ -327,7 +335,6 @@ class Tink {
 
         //Is the sprite circular?
         else {
-
           //Find the distance between the pointer and the
           //center of the circle
           let vx = this.x - (sprite.gx + (sprite.width / 2) - xAnchorOffset),
@@ -338,6 +345,7 @@ class Tink {
           //distance is less than the circle's radius
           hit = distance < sprite.width / 2;
         }
+        //Check the value of `hit`
         return hit;
       }
     };
@@ -790,12 +798,12 @@ class Tink {
 
     if (speed === undefined) {
       throw new Error("Please supply the arrowControl method with the speed at which you want the sprite to move");
-    } 
+    }
 
     let upArrow = this.keyboard(38),
-        rightArrow = this.keyboard(39),
-        downArrow = this.keyboard(40),
-        leftArrow = this.keyboard(37);
+      rightArrow = this.keyboard(39),
+      downArrow = this.keyboard(40),
+      leftArrow = this.keyboard(37);
 
     //Assign key `press` methods
     leftArrow.press = () => {
@@ -838,5 +846,5 @@ class Tink {
         sprite.vy = 0;
       }
     };
-  }  
+  }
 }

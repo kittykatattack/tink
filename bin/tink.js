@@ -10,6 +10,7 @@ var Tink = (function () {
 
     _classCallCheck(this, Tink);
 
+    console.log(element);
     //Add element and scale properties
     this.element = element;
     this.scale = scale;
@@ -126,7 +127,7 @@ var Tink = (function () {
       //The pointer object will be returned by this function
       var pointer = {
         element: element,
-        scale: scale,
+        _scale: scale,
 
         //Private x and y properties
         _x: 0,
@@ -164,6 +165,13 @@ var Tink = (function () {
             x: this.x,
             y: this.y
           };
+        },
+
+        get scale() {
+          return this._scale;
+        },
+        set scale(value) {
+          this._scale = value;
         },
 
         //Add a `cursor` getter/setter to change the pointer's cursor
@@ -356,7 +364,6 @@ var Tink = (function () {
 
           //Is the sprite circular?
           else {
-
               //Find the distance between the pointer and the
               //center of the circle
               var vx = this.x - (sprite.gx + sprite.width / 2 - xAnchorOffset),
@@ -367,6 +374,7 @@ var Tink = (function () {
               //distance is less than the circle's radius
               hit = distance < sprite.width / 2;
             }
+          //Check the value of `hit`
           return hit;
         }
       };
