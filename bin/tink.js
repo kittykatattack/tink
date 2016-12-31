@@ -31,7 +31,7 @@ var Tink = (function () {
 
     //Aliases for Pixi objects
     this.TextureCache = this.PIXI.utils.TextureCache;
-    this.MovieClip = this.PIXI.extras.MovieClip;
+    this.AnimatedSprite = this.PIXI.extras.AnimatedSprite;
     this.Texture = this.PIXI.Texture;
   }
 
@@ -712,11 +712,11 @@ var Tink = (function () {
         if (this.TextureCache[source[0]]) {
 
           //It does, so it's an array of frame ids
-          o = this.MovieClip.fromFrames(source);
+          o = this.AnimatedSprite.fromFrames(source);
         } else {
 
           //It's not already in the cache, so let's load it
-          o = this.MovieClip.fromImages(source);
+          o = this.AnimatedSprite.fromImages(source);
         }
       }
 
@@ -725,8 +725,8 @@ var Tink = (function () {
       else if (source[0] instanceof this.Texture) {
 
           //Yes, it's an array of textures.
-          //Use them to make a MovieClip o
-          o = new this.MovieClip(source);
+          //Use them to make a AnimatedSprite o
+          o = new this.AnimatedSprite(source);
         }
 
       //Add interactive properties to the button
