@@ -405,5 +405,10 @@ let t = new Tink(PIXI, renderer.view, scale);
 ```
 This will ensure that the coordinates that Tink uses will match the canvas's scaled pixel coordinates.
 
-
-
+Finally, make sure to update the Tink scale if you also opted for rescaling the canvas element every time the size of the browser window has changed:
+```js
+window.addEventListener("resize", function(event){ 
+  let scale = scaleToWindow(anyCanvasElement);
+  t.scale(scale)
+});
+```
