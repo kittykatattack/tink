@@ -3,7 +3,7 @@ class Tink {
 
     //Add element and scale properties
     this.element = element;
-    this.scale = scale;
+    this._scale = scale;
 
     //An array to store all the draggable sprites
     this.draggableSprites = [];
@@ -23,6 +23,17 @@ class Tink {
     this.TextureCache = this.PIXI.utils.TextureCache;
     this.AnimatedSprite = this.PIXI.extras.AnimatedSprite;
     this.Texture = this.PIXI.Texture;
+  }
+
+  get scale() {
+    return this._scale;
+  }
+
+  set scale(value) {
+    this._scale = value;
+
+    //Update scale values for all pointers
+    this.pointers.forEach(pointer => pointer.scale = value);
   }
 
   //`makeDraggable` lets you make a drag-and-drop sprite by pushing it
