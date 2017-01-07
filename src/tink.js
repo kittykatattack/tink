@@ -1,8 +1,7 @@
 class Tink {
   constructor(PIXI, element, scale = 1) {
 
-    console.log(element)
-      //Add element and scale properties
+    //Add element and scale properties
     this.element = element;
     this.scale = scale;
 
