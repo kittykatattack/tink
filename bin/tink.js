@@ -10,10 +10,9 @@ var Tink = (function () {
 
     _classCallCheck(this, Tink);
 
-    console.log(element);
     //Add element and scale properties
     this.element = element;
-    this.scale = scale;
+    this._scale = scale;
 
     //An array to store all the draggable sprites
     this.draggableSprites = [];
@@ -31,15 +30,17 @@ var Tink = (function () {
 
     //Aliases for Pixi objects
     this.TextureCache = this.PIXI.utils.TextureCache;
-    this.AnimatedSprite = this.PIXI.extras.AnimatedSprite;
+
+    //Note: change MovieClip to AnimatedSprite for Pixi v4
+    this.AnimatedSprite = this.PIXI.extras.MovieClip;
     this.Texture = this.PIXI.Texture;
   }
 
-  //`makeDraggable` lets you make a drag-and-drop sprite by pushing it
-  //into the `draggableSprites` array
-
   _createClass(Tink, [{
     key: "makeDraggable",
+
+    //`makeDraggable` lets you make a drag-and-drop sprite by pushing it
+    //into the `draggableSprites` array
     value: function makeDraggable() {
       var _this = this;
 
@@ -876,6 +877,19 @@ var Tink = (function () {
           sprite.vy = 0;
         }
       };
+    }
+  }, {
+    key: "scale",
+    get: function get() {
+      return this._scale;
+    },
+    set: function set(value) {
+      this._scale = value;
+
+      //Update scale values for all pointers
+      this.pointers.forEach(function (pointer) {
+        return pointer.scale = value;
+      });
     }
   }]);
 

@@ -21,7 +21,9 @@ class Tink {
 
     //Aliases for Pixi objects
     this.TextureCache = this.PIXI.utils.TextureCache;
-    this.AnimatedSprite = this.PIXI.extras.AnimatedSprite;
+
+    //Note: change MovieClip to AnimatedSprite for Pixi v4
+    this.AnimatedSprite = this.PIXI.extras.MovieClip;
     this.Texture = this.PIXI.Texture;
   }
 

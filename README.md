@@ -1,4 +1,4 @@
-Tink - Interactivity utilities for Pixi
+Tink - Interactivity utilities for Pixi (v3.9)
 =======================================
 
 Tink is an easy-to-use set of interactivity tools for the Pixi
@@ -21,6 +21,8 @@ rendering engine. You can use Tink to easily create:
 [Setting Tink's optional scale](#scale) <br>
 
 Let's find out how to use Tink.
+
+[Important! Tink tagets Pixi v3.9, which is the most stable current version of Pixi, and is the only version I can recommend using. This library will eventually be upgraded for Pixi v4 when the v4 branch matures.]
 
 <a id="settingup"></a>
 Setting up
