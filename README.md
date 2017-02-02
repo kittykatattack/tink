@@ -10,6 +10,8 @@ rendering engine. You can use Tink to easily create:
   mouse.
 - Interactive sprites that behave like buttons.
 
+(Important! This library targets Pixi v3.9, which is the most stable version of Pixi, and is the only version I can recommend using. This library will eventually be upgraded for Pixi v4 when the v4 branch matures.)
+
 [Setting up](#settingup) <br>
 [A universal pointer](#auniversalpointer) <br>
 [Pointer interaction with sprites](#pointerinteractionwithsprites) <br>
@@ -21,8 +23,6 @@ rendering engine. You can use Tink to easily create:
 [Setting Tink's optional scale](#scale) <br>
 
 Let's find out how to use Tink.
-
-[Important! Tink tagets Pixi v3.9, which is the most stable current version of Pixi, and is the only version I can recommend using. This library will eventually be upgraded for Pixi v4 when the v4 branch matures.]
 
 <a id="settingup"></a>
 Setting up
