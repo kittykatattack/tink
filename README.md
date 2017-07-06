@@ -1,4 +1,4 @@
-Tink - Interactivity utilities for Pixi (v3.9)
+Tink - Interactivity utilities for Pixi (v3.0.11)
 =======================================
 
 Tink is an easy-to-use set of interactivity tools for the Pixi
@@ -10,7 +10,7 @@ rendering engine. You can use Tink to easily create:
   mouse.
 - Interactive sprites that behave like buttons.
 
-(Important! This library targets Pixi v3.9, which is the most stable version of Pixi, and is the only version I can recommend using. This library will eventually be upgraded for Pixi v4 when the v4 branch matures.)
+(Important! This library targets Pixi v3.0.11, which is the most stable version of Pixi, and is the only version I can recommend using. This library will eventually be upgraded for Pixi v4 when the v4 branch matures.)
 
 [Setting up](#settingup) <br>
 [A universal pointer](#auniversalpointer) <br>
