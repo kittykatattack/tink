@@ -567,16 +567,16 @@ class Tink {
       this.makePointer(this.element, this.scale);
     }
 
-    //Loop through all the button-like sprites that were created
-    //using the `makeInteractive` method
-    this.buttons.forEach(o => {
+    //Loop through all of Tink's pointers (there will usually
+    //just be one)
+    this.pointers.forEach(pointer => {
+      pointer.shouldBeHand = false;
+      //Loop through all the button-like sprites that were created
+      //using the `makeInteractive` method
+      this.buttons.forEach(o => {
 
-      //Only do this if the interactive object is enabled
-      if (o.enabled) {
-
-        //Loop through all of Tink's pointers (there will usually
-        //just be one)
-        this.pointers.forEach(pointer => {
+        //Only do this if the interactive object is enabled
+        if (o.enabled) {
 
           //Figure out if the pointer is touching the sprite
           let hit = pointer.hitTestSprite(o);
@@ -621,12 +621,13 @@ class Tink {
             }
 
 
-            //Change the pointer icon to a hand
-            if (pointer.visible) pointer.cursor = "pointer";
-          } else {
-            //Turn the pointer to an ordinary arrow icon if the
-            //pointer isn't touching a sprite
-            if (pointer.visible) pointer.cursor = "auto";
+            //Flag this pointer to be changed to a hand
+            pointer.shouldBeHand = true;
+            //if (pointer.visible) pointer.cursor = "pointer";
+          // } else {
+          //   //Turn the pointer to an ordinary arrow icon if the
+          //   //pointer isn't touching a sprite
+          //   if (pointer.visible) pointer.cursor = "auto";
           }
 
           //Perform the correct interactive action
@@ -676,7 +677,12 @@ class Tink {
               o.hoverOver = false;
             }
           }
-        });
+        }
+      });
+      if (pointer.shouldBeHand) {
+        pointer.cursor = "pointer";
+      } else {
+        pointer.cursor = "auto";
       }
     });
   }
