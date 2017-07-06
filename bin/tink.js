@@ -578,16 +578,16 @@ var Tink = (function () {
         this.makePointer(this.element, this.scale);
       }
 
-      //Loop through all the button-like sprites that were created
-      //using the `makeInteractive` method
-      this.buttons.forEach(function (o) {
+      //Loop through all of Tink's pointers (there will usually
+      //just be one)
+      this.pointers.forEach(function (pointer) {
 
-        //Only do this if the interactive object is enabled
-        if (o.enabled) {
+        //Loop through all the button-like sprites that were created
+        //using the `makeInteractive` method
+        _this3.buttons.forEach(function (o) {
 
-          //Loop through all of Tink's pointers (there will usually
-          //just be one)
-          _this3.pointers.forEach(function (pointer) {
+          //Only do this if the interactive object is enabled
+          if (o.enabled) {
 
             //Figure out if the pointer is touching the sprite
             var hit = pointer.hitTestSprite(o);
@@ -686,8 +686,8 @@ var Tink = (function () {
                 o.hoverOver = false;
               }
             }
-          });
-        }
+          }
+        });
       });
     }
 
@@ -895,4 +895,3 @@ var Tink = (function () {
 
   return Tink;
 })();
-//# sourceMappingURL=tink.js.map
