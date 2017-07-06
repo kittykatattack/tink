@@ -571,6 +571,10 @@ class Tink {
     //just be one)
     this.pointers.forEach(pointer => {
 
+      pointer.shouldBeHand = false;
+
+
+
       //Loop through all the button-like sprites that were created
       //using the `makeInteractive` method
       this.buttons.forEach(o => {
@@ -620,12 +624,23 @@ class Tink {
               }
             }
 
+
+
+            //Flag this pointer to be changed to a hand
+            pointer.shouldBeHand = true;
+            //if (pointer.visible) pointer.cursor = "pointer";
+          // } else {
+          //   //Turn the pointer to an ordinary arrow icon if the
+          //   //pointer isn't touching a sprite
+          //   if (pointer.visible) pointer.cursor = "auto";
+
             //Change the pointer icon to a hand
             if (pointer.visible) pointer.cursor = "pointer";
           } else {
             //Turn the pointer to an ordinary arrow icon if the
             //pointer isn't touching a sprite
             if (pointer.visible) pointer.cursor = "auto";
+
           }
 
           //Perform the correct interactive action
@@ -677,6 +692,14 @@ class Tink {
           }
         }
       });
+
+      if (pointer.shouldBeHand) {
+        pointer.cursor = "pointer";
+      } else {
+        pointer.cursor = "auto";
+      }
+
+
     });
   }
 
