@@ -549,6 +549,7 @@ class Tink {
       this.makePointer(this.element, this.scale);
     }
 
+
     //Loop through all of Tink's pointers (there will usually
     //just be one)
     this.pointers.forEach(pointer => {
@@ -557,11 +558,17 @@ class Tink {
       //using the `makeInteractive` method
       this.buttons.forEach(o => {
 
-        //Only do this if the interactive object is enabled
-        if (o.enabled) {
+
+        //Loop through all the button-like sprites that were created
+        //using the `makeInteractive` method
+        _this3.buttons.forEach(function (o) {
 
           //Figure out if the pointer is touching the sprite
           let hit = pointer.hitTestSprite(o);
+
+          //Only do this if the interactive object is enabled
+          if (o.enabled) {
+
 
           //1. Figure out the current state
           if (pointer.isUp) {
@@ -658,7 +665,11 @@ class Tink {
               o.hoverOver = false;
             }
           }
+
         }
+
+        });
+
       });
       if (pointer.shouldBeHand) {
         pointer.cursor = "pointer";
@@ -843,4 +854,9 @@ class Tink {
   }
 }
 
+
 //# sourceMappingURL=tink.js.map
+
+  return Tink;
+})();
+
