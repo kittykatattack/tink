@@ -205,7 +205,7 @@ in your games and applications. Tink has a useful button method that
 lets you quickly create them. Before I show you how to make buttons, 
 lets first find out what buttons actually are, can how you can use them.
 
-###What are buttons?
+### What are buttons?
 
 You can think of buttons as "clickable/touchable sprites". The most important 
 thing you need to know about buttons is that they have **states** and
@@ -253,7 +253,7 @@ playButton.action
 Got it? Good! So how do we actually make buttons?
 
 <a id="makingbuttons"></a>
-###Making buttons
+### Making buttons
 
 First, start with three images that define the three button states. 
 You might call them "up.png", "over.png", and "down.png". Then add those three 
