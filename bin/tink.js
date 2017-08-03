@@ -911,3 +911,4 @@ var Tink = (function () {
 
   return Tink;
 })();
+//# sourceMappingURL=tink.js.map
