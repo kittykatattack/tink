@@ -101,7 +101,17 @@ class Tink {
   }
 
   makePointer(element = this.element, scale = this.scale) {
-
+	//calculate total offset
+	var tempElem = element;
+	var totalOffsetTop = 0;
+	var totalOffsetLeft = 0;
+	while (tempElem != null){
+		totalOffsetTop += tempElem.offsetTop;
+		totalOffsetLeft += tempElem.offsetLeft;
+		tempElem = tempElem.offsetParent;
+	}
+  
+  
     //Get a reference to Tink's global `draggableSprites` array
     let draggableSprites = this.draggableSprites;
 
@@ -212,8 +222,8 @@ class Tink {
 
         //Find the pointer’s x and y position (for mouse).
         //Subtract the element's top and left offset from the browser window
-        this._x = (event.pageX - element.offsetLeft);
-        this._y = (event.pageY - element.offsetTop);
+        this._x = (event.pageX - totalOffsetLeft);
+        this._y = (event.pageY - totalOffsetTop);
 
         //Prevent the event's default behavior 
         event.preventDefault();
@@ -224,8 +234,8 @@ class Tink {
         let element = event.target;
 
         //Find the touch point's x and y position
-        this._x = (event.targetTouches[0].pageX - element.offsetLeft);
-        this._y = (event.targetTouches[0].pageY - element.offsetTop);
+        this._x = (event.targetTouches[0].pageX - totalOffsetLeft);
+        this._y = (event.targetTouches[0].pageY - totalOffsetTop);
         event.preventDefault();
       },
 
@@ -250,8 +260,8 @@ class Tink {
         let element = event.target;
 
         //Find the touch point's x and y position
-        this._x = event.targetTouches[0].pageX - element.offsetLeft;
-        this._y = event.targetTouches[0].pageY - element.offsetTop;
+        this._x = event.targetTouches[0].pageX - totalOffsetLeft;
+        this._y = event.targetTouches[0].pageY - totalOffsetTop;
 
         //Set the down states
         this.isDown = true;
