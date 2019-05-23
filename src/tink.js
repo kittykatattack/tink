@@ -23,7 +23,7 @@ class Tink {
     this.TextureCache = this.PIXI.utils.TextureCache;
 
     //Note: change MovieClip to AnimatedSprite for Pixi v4
-    this.AnimatedSprite = this.PIXI.extras.MovieClip;
+    this.AnimatedSprite = this.PIXI.AnimatedSprite || this.PIXI.extras.MovieClip;
     this.Texture = this.PIXI.Texture;
   }
 
